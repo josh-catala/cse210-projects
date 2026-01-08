@@ -1,4 +1,4 @@
-# cse210-joshua-catala
+# cse210-jls-catala
 
 This repository contains the starter code for many different projects. They are arranged as follows:
 
