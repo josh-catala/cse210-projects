@@ -178,7 +178,5 @@ class Program
                 using_journal = false;
             }
         }
-      
-
     }
 }
