@@ -31,7 +31,7 @@ namespace MindfulnessProgram
     {
         public static void Main(string[] args)
         {
-            var logger = new ActivityLogger();
+            ActivityLogger logger = new ActivityLogger();
             bool running = true;
 
             while (running)
@@ -47,21 +47,23 @@ namespace MindfulnessProgram
                 Console.WriteLine("6) Quit");
                 Console.Write("Select a choice from the menu: ");
 
-                string? choice = Console.ReadLine();
+                string choice = Console.ReadLine();
 
-                Activity? activity = choice switch
-                {
-                    "1" => new BreathingActivity(),
-                    "2" => new ReflectionActivity(),
-                    "3" => new ListingActivity(),
-                    "4" => new GratitudeActivity(),
-                    _ => null
-                };
+                // Fixed: replaced switch expression (=>) with if/else chain
+                Activity activity = null;
+                if (choice == "1")
+                    activity = new BreathingActivity();
+                else if (choice == "2")
+                    activity = new ReflectionActivity();
+                else if (choice == "3")
+                    activity = new ListingActivity();
+                else if (choice == "4")
+                    activity = new GratitudeActivity();
 
                 if (activity != null)
                 {
                     activity.Run();
-                    logger.RecordCompletion(activity.Name, activity.CompletedDurationSeconds);
+                    logger.RecordCompletion(activity.GetName(), activity.GetCompletedDurationSeconds());
                     Console.WriteLine();
                     Console.WriteLine("Press enter to return to the menu.");
                     Console.ReadLine();

@@ -3,14 +3,8 @@ using System.Threading;
 
 namespace MindfulnessProgram
 {
-    /// <summary>
-    /// Base class for all mindfulness activities. Encapsulates the shared
-    /// starting/ending messages, timing, and animation behaviors so that
-    /// each derived activity only needs to implement its own unique logic.
-    /// </summary>
     public abstract class Activity
     {
-        // Private fields -- only accessible through this class (encapsulation).
         private readonly string _name;
         private readonly string _description;
         private int _durationSeconds;
@@ -22,18 +16,22 @@ namespace MindfulnessProgram
             _description = description;
         }
 
-        // Expose read-only access to derived classes / callers without
-        // allowing external code to modify the values directly.
-        public string Name => _name;
-        public int CompletedDurationSeconds => _durationSeconds;
-        protected int DurationSeconds => _durationSeconds;
+        // Fixed: replaced properties with getter methods
+        public string GetName()
+        {
+            return _name;
+        }
 
-        /// <summary>
-        /// Template method that defines the overall flow every activity
-        /// follows: starting message -> activity-specific work -> ending
-        /// message. Individual activities cannot skip or reorder these
-        /// steps, which keeps the experience consistent across activities.
-        /// </summary>
+        public int GetCompletedDurationSeconds()
+        {
+            return _durationSeconds;
+        }
+
+        protected int GetDurationSeconds()
+        {
+            return _durationSeconds;
+        }
+
         public void Run()
         {
             DisplayStartingMessage();
@@ -42,10 +40,6 @@ namespace MindfulnessProgram
             DisplayEndingMessage();
         }
 
-        /// <summary>
-        /// Common starting message shared by every activity: name,
-        /// description, duration prompt, and a short "get ready" pause.
-        /// </summary>
         private void DisplayStartingMessage()
         {
             Console.Clear();
@@ -61,9 +55,6 @@ namespace MindfulnessProgram
             ShowSpinner(3);
         }
 
-        /// <summary>
-        /// Common ending message shared by every activity.
-        /// </summary>
         private void DisplayEndingMessage()
         {
             Console.WriteLine();
@@ -74,9 +65,6 @@ namespace MindfulnessProgram
             ShowSpinner(3);
         }
 
-        /// <summary>
-        /// Repeatedly asks for a valid whole number of seconds.
-        /// </summary>
         private int PromptForDuration()
         {
             int duration;
@@ -93,10 +81,6 @@ namespace MindfulnessProgram
             return duration;
         }
 
-        /// <summary>
-        /// Returns true once the activity's overall duration has elapsed.
-        /// Derived classes use this to know when to stop looping.
-        /// </summary>
         protected bool DurationElapsed()
         {
             return (DateTime.Now - _activityStartTime).TotalSeconds >= _durationSeconds;
@@ -107,11 +91,6 @@ namespace MindfulnessProgram
             return (DateTime.Now - _activityStartTime).TotalSeconds;
         }
 
-        /// <summary>
-        /// Displays a simple rotating spinner animation for the given
-        /// number of seconds. One of the shared "pause with animation"
-        /// behaviors required by the assignment.
-        /// </summary>
         protected void ShowSpinner(int seconds)
         {
             string[] frames = { "|", "/", "-", "\\" };
@@ -126,10 +105,6 @@ namespace MindfulnessProgram
             }
         }
 
-        /// <summary>
-        /// Displays a countdown (e.g. 3, 2, 1) animation for the given
-        /// number of seconds. Another shared "pause with animation" option.
-        /// </summary>
         protected void ShowCountDown(int seconds)
         {
             for (int i = seconds; i > 0; i--)
@@ -140,10 +115,6 @@ namespace MindfulnessProgram
             }
         }
 
-        /// <summary>
-        /// The unique work each activity performs. Must be implemented by
-        /// every derived class (abstraction).
-        /// </summary>
         protected abstract void PerformActivity();
     }
 }

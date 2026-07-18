@@ -1,22 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace EternalQuest
 {
-    // Owns the full set of goals and the running score, and drives all the
-    // menus the user interacts with. Keeping this logic out of Program.cs
-    // (and out of the Goal classes themselves) keeps each class focused on
-    // a single responsibility - encapsulation of the "quest" as a whole.
     public class GoalManager
     {
         private List<Goal> _goals;
         private int _score;
 
-        // CREATIVE ADDITION: points-per-level and a set of badge thresholds
-        // give the whole thing a light "leveling up" feel as the user racks
-        // up points, similar to a game's XP bar.
         private const int PointsPerLevel = 1000;
         private readonly int[] _badgeThresholds = { 500, 1000, 2500, 5000, 10000 };
         private HashSet<int> _announcedBadges = new HashSet<int>();
@@ -27,8 +19,17 @@ namespace EternalQuest
             _score = 0;
         }
 
-        public int Score => _score;
-        public int Level => (_score < 0 ? 0 : _score) / PointsPerLevel + 1;
+        // Fixed: replaced expression-bodied properties with getter methods
+        public int GetScore()
+        {
+            return _score;
+        }
+
+        public int GetLevel()
+        {
+            int raw = _score < 0 ? 0 : _score;
+            return raw / PointsPerLevel + 1;
+        }
 
         private int PointsIntoLevel()
         {
@@ -46,7 +47,7 @@ namespace EternalQuest
 
             Console.WriteLine();
             Console.WriteLine($"Score: {_score} points");
-            Console.WriteLine($"Level: {Level}  [{bar}] {intoLevel}/{PointsPerLevel} to next level");
+            Console.WriteLine($"Level: {GetLevel()}  [{bar}] {intoLevel}/{PointsPerLevel} to next level");
             Console.WriteLine();
         }
 
@@ -77,52 +78,48 @@ namespace EternalQuest
             Console.WriteLine("  4. Progress Goal     (log units toward one big goal, e.g. train for a marathon)");
             Console.WriteLine("  5. Negative Goal     (a bad habit that costs you points)");
             Console.Write("Choice: ");
-            string? choice = Console.ReadLine();
+            string choice = Console.ReadLine();
 
             Console.Write("Goal name: ");
-            string name = Console.ReadLine() ?? "";
+            string name = Console.ReadLine();
+            if (name == null) name = "";
 
-            switch (choice)
+            if (choice == "1")
             {
-                case "1":
-                    {
-                        int points = ReadInt("Points for completing it: ");
-                        _goals.Add(new SimpleGoal(name, points));
-                        break;
-                    }
-                case "2":
-                    {
-                        int points = ReadInt("Points earned each time it's recorded: ");
-                        _goals.Add(new EternalGoal(name, points));
-                        break;
-                    }
-                case "3":
-                    {
-                        int points = ReadInt("Points earned each time it's recorded: ");
-                        int target = ReadInt("Number of times required to complete it: ");
-                        int bonus = ReadInt("Bonus points awarded on completion: ");
-                        _goals.Add(new ChecklistGoal(name, points, target, bonus));
-                        break;
-                    }
-                case "4":
-                    {
-                        Console.Write("Unit of progress (e.g. miles, chapters, pages): ");
-                        string unit = Console.ReadLine() ?? "units";
-                        int points = ReadInt($"Points earned per {unit}: ");
-                        int target = ReadInt($"Total {unit} needed to complete the goal: ");
-                        int bonus = ReadInt("Bonus points awarded on completion: ");
-                        _goals.Add(new ProgressGoal(name, points, target, bonus, unit));
-                        break;
-                    }
-                case "5":
-                    {
-                        int points = ReadInt("Points lost each time it happens: ");
-                        _goals.Add(new NegativeGoal(name, points));
-                        break;
-                    }
-                default:
-                    Console.WriteLine("That's not a valid option, no goal was created.");
-                    return;
+                int points = ReadInt("Points for completing it: ");
+                _goals.Add(new SimpleGoal(name, points));
+            }
+            else if (choice == "2")
+            {
+                int points = ReadInt("Points earned each time it's recorded: ");
+                _goals.Add(new EternalGoal(name, points));
+            }
+            else if (choice == "3")
+            {
+                int points = ReadInt("Points earned each time it's recorded: ");
+                int target = ReadInt("Number of times required to complete it: ");
+                int bonus = ReadInt("Bonus points awarded on completion: ");
+                _goals.Add(new ChecklistGoal(name, points, target, bonus));
+            }
+            else if (choice == "4")
+            {
+                Console.Write("Unit of progress (e.g. miles, chapters, pages): ");
+                string unit = Console.ReadLine();
+                if (unit == null) unit = "units";
+                int points = ReadInt($"Points earned per {unit}: ");
+                int target = ReadInt($"Total {unit} needed to complete the goal: ");
+                int bonus = ReadInt("Bonus points awarded on completion: ");
+                _goals.Add(new ProgressGoal(name, points, target, bonus, unit));
+            }
+            else if (choice == "5")
+            {
+                int points = ReadInt("Points lost each time it happens: ");
+                _goals.Add(new NegativeGoal(name, points));
+            }
+            else
+            {
+                Console.WriteLine("That's not a valid option, no goal was created.");
+                return;
             }
 
             Console.WriteLine($"Goal \"{name}\" created!");
@@ -148,8 +145,9 @@ namespace EternalQuest
             Goal goal = _goals[index];
             int earned;
 
-            if (goal is ProgressGoal progressGoal)
+            if (goal is ProgressGoal)
             {
+                ProgressGoal progressGoal = (ProgressGoal)goal;
                 int amount = ReadInt("How many units of progress did you make? ");
                 earned = progressGoal.RecordProgress(amount);
             }
@@ -163,7 +161,7 @@ namespace EternalQuest
 
         private void ApplyPoints(int earned, Goal goal)
         {
-            int levelBefore = Level;
+            int levelBefore = GetLevel();
             _score += earned;
 
             if (earned > 0)
@@ -179,14 +177,14 @@ namespace EternalQuest
                 Console.WriteLine("That goal is already complete - nothing more to record.");
             }
 
-            if (goal.IsComplete)
+            if (goal.GetIsComplete())
             {
-                Console.WriteLine($"Goal \"{goal.Name}\" is now complete!");
+                Console.WriteLine($"Goal \"{goal.GetName()}\" is now complete!");
             }
 
-            if (Level > levelBefore)
+            if (GetLevel() > levelBefore)
             {
-                Console.WriteLine($"*** LEVEL UP! You are now level {Level}! ***");
+                Console.WriteLine($"*** LEVEL UP! You are now level {GetLevel()}! ***");
             }
 
             foreach (int threshold in _badgeThresholds)
@@ -205,7 +203,7 @@ namespace EternalQuest
             while (true)
             {
                 Console.Write(prompt);
-                string? input = Console.ReadLine();
+                string input = Console.ReadLine();
                 if (int.TryParse(input, out value))
                 {
                     return value;
@@ -216,12 +214,22 @@ namespace EternalQuest
 
         public void SaveGoals(string filename)
         {
-            using StreamWriter writer = new StreamWriter(filename);
-            writer.WriteLine(_score);
-            writer.WriteLine(string.Join(",", _announcedBadges));
-            foreach (Goal goal in _goals)
+            using (StreamWriter writer = new StreamWriter(filename))
             {
-                writer.WriteLine(goal.GetStringRepresentation());
+                writer.WriteLine(_score);
+
+                // Build badge string manually without lambdas
+                List<string> badgeTokens = new List<string>();
+                foreach (int badge in _announcedBadges)
+                {
+                    badgeTokens.Add(badge.ToString());
+                }
+                writer.WriteLine(string.Join(",", badgeTokens));
+
+                foreach (Goal goal in _goals)
+                {
+                    writer.WriteLine(goal.GetStringRepresentation());
+                }
             }
             Console.WriteLine($"Goals saved to {filename}.");
         }
@@ -266,15 +274,18 @@ namespace EternalQuest
                 string[] parts = lines[i].Split(':');
                 string type = parts[0];
 
-                Goal? goal = type switch
-                {
-                    "SimpleGoal" => SimpleGoal.CreateFromString(parts),
-                    "EternalGoal" => EternalGoal.CreateFromString(parts),
-                    "ChecklistGoal" => ChecklistGoal.CreateFromString(parts),
-                    "ProgressGoal" => ProgressGoal.CreateFromString(parts),
-                    "NegativeGoal" => NegativeGoal.CreateFromString(parts),
-                    _ => null
-                };
+                // Fixed: replaced switch expression (=>) with if/else chain
+                Goal goal = null;
+                if (type == "SimpleGoal")
+                    goal = SimpleGoal.CreateFromString(parts);
+                else if (type == "EternalGoal")
+                    goal = EternalGoal.CreateFromString(parts);
+                else if (type == "ChecklistGoal")
+                    goal = ChecklistGoal.CreateFromString(parts);
+                else if (type == "ProgressGoal")
+                    goal = ProgressGoal.CreateFromString(parts);
+                else if (type == "NegativeGoal")
+                    goal = NegativeGoal.CreateFromString(parts);
 
                 if (goal != null)
                 {

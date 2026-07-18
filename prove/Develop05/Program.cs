@@ -57,37 +57,46 @@ namespace EternalQuest
                 Console.WriteLine("  6. Load Goals");
                 Console.WriteLine("  0. Quit");
                 Console.Write("Choice: ");
-                string? choice = Console.ReadLine();
+                string choice = Console.ReadLine();
 
-                switch (choice)
+                if (choice == "1")
                 {
-                    case "1":
-                        goalManager.DisplayPlayerStatus();
-                        break;
-                    case "2":
-                        goalManager.DisplayGoals();
-                        break;
-                    case "3":
-                        goalManager.CreateGoalMenu();
-                        break;
-                    case "4":
-                        goalManager.RecordEventMenu();
-                        break;
-                    case "5":
-                        Console.Write("File name to save to (e.g. goals.txt): ");
-                        goalManager.SaveGoals(Console.ReadLine() ?? "goals.txt");
-                        break;
-                    case "6":
-                        Console.Write("File name to load from (e.g. goals.txt): ");
-                        goalManager.LoadGoals(Console.ReadLine() ?? "goals.txt");
-                        break;
-                    case "0":
-                        running = false;
-                        Console.WriteLine("Keep pressing forward on your Eternal Quest. Goodbye!");
-                        break;
-                    default:
-                        Console.WriteLine("That's not a valid option, try again.");
-                        break;
+                    goalManager.DisplayPlayerStatus();
+                }
+                else if (choice == "2")
+                {
+                    goalManager.DisplayGoals();
+                }
+                else if (choice == "3")
+                {
+                    goalManager.CreateGoalMenu();
+                }
+                else if (choice == "4")
+                {
+                    goalManager.RecordEventMenu();
+                }
+                else if (choice == "5")
+                {
+                    Console.Write("File name to save to (e.g. goals.txt): ");
+                    string filename = Console.ReadLine();
+                    if (filename == null) filename = "goals.txt";
+                    goalManager.SaveGoals(filename);
+                }
+                else if (choice == "6")
+                {
+                    Console.Write("File name to load from (e.g. goals.txt): ");
+                    string filename = Console.ReadLine();
+                    if (filename == null) filename = "goals.txt";
+                    goalManager.LoadGoals(filename);
+                }
+                else if (choice == "0")
+                {
+                    running = false;
+                    Console.WriteLine("Keep pressing forward on your Eternal Quest. Goodbye!");
+                }
+                else
+                {
+                    Console.WriteLine("That's not a valid option, try again.");
                 }
             }
         }

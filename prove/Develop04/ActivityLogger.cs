@@ -1,16 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace MindfulnessProgram
 {
-    /// <summary>
-    /// Bonus feature to exceed core requirements: keeps a simple log of how
-    /// many times each activity has been completed and the total seconds
-    /// spent, persisting it to a text file so history carries across runs
-    /// of the program.
-    /// </summary>
     public class ActivityLogger
     {
         private const string LogFilePath = "activity_log.txt";
@@ -45,11 +38,15 @@ namespace MindfulnessProgram
             }
             else
             {
-                foreach (var entry in _log.OrderBy(e => e.Key))
+                // Fixed: replaced OrderBy lambda with manual loop
+                List<string> keys = new List<string>(_log.Keys);
+                keys.Sort();
+                foreach (string key in keys)
                 {
+                    var value = _log[key];
                     Console.WriteLine(
-                        $"{entry.Key}: completed {entry.Value.count} time(s), " +
-                        $"{entry.Value.totalSeconds} total seconds");
+                        $"{key}: completed {value.count} time(s), " +
+                        $"{value.totalSeconds} total seconds");
                 }
             }
             Console.WriteLine();
@@ -61,7 +58,12 @@ namespace MindfulnessProgram
         {
             try
             {
-                var lines = _log.Select(e => $"{e.Key},{e.Value.count},{e.Value.totalSeconds}");
+                // Fixed: replaced Select lambda with manual loop
+                List<string> lines = new List<string>();
+                foreach (var entry in _log)
+                {
+                    lines.Add($"{entry.Key},{entry.Value.count},{entry.Value.totalSeconds}");
+                }
                 File.WriteAllLines(LogFilePath, lines);
             }
             catch (IOException)
