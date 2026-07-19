@@ -47,10 +47,10 @@ namespace MindfulnessProgram
                 Console.WriteLine("6) Quit");
                 Console.Write("Select a choice from the menu: ");
 
-                string choice = Console.ReadLine();
+                string? choice = Console.ReadLine();
 
                 // Fixed: replaced switch expression (=>) with if/else chain
-                Activity activity = null;
+                Activity? activity = null;
                 if (choice == "1")
                     activity = new BreathingActivity();
                 else if (choice == "2")
